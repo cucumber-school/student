@@ -1,0 +1,45 @@
+#!/bin/bash
+
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+	clone)
+		COMMAND=$1
+		echo "command: $COMMAND"
+		shift
+		;;
+  -l | --language)
+		LANGUAGE=$2
+    echo "lang: $LANGUAGE"
+		shift
+		shift
+    ;;
+  -c | --chapter)
+		CHAPTER=$2
+    echo "chapter: $CHAPTER"
+		shift
+		shift
+    ;;
+	-d | --directory)
+		DIRECTORY=$2
+		echo "directory: $DIRECTORY"
+		shift
+		shift
+		;;
+  -h | --help)
+    echo "cucumber-school: Student tourguide to the code examples"
+    show_usage
+    exit 0
+    ;;
+  --* | -*)
+    echo "Unknown option $1"
+    show_usage
+    exit 1
+    ;;
+  esac
+done
+
+cmd="git clone --quiet --single-branch --branch \"code.bdd-with-cucumber.$CHAPTER.$LANGUAGE.start\" git@github.com:cucumber-school/scripts \"$DIRECTORY\""
+echo "$cmd"
+eval "$cmd"
