@@ -1,32 +1,30 @@
 #!/bin/bash
 
-POSITIONAL_ARGS=()
-
 while [[ $# -gt 0 ]]; do
   case $1 in
-	clone)
-		COMMAND=$1
-		echo "command: $COMMAND"
-		shift
-		;;
+  clone)
+    COMMAND=$1
+    echo "command: $COMMAND"
+    shift
+    ;;
   -l | --language)
-		LANGUAGE=$2
+    LANGUAGE=$2
     echo "lang: $LANGUAGE"
-		shift
-		shift
+    shift
+    shift
     ;;
   -c | --chapter)
-		CHAPTER=$2
+    CHAPTER=$2
     echo "chapter: $CHAPTER"
-		shift
-		shift
+    shift
+    shift
     ;;
-	-d | --directory)
-		DIRECTORY=$2
-		echo "directory: $DIRECTORY"
-		shift
-		shift
-		;;
+  -d | --directory)
+    DIRECTORY=$2
+    echo "directory: $DIRECTORY"
+    shift
+    shift
+    ;;
   -h | --help)
     echo "cucumber-school: Student tourguide to the code examples"
     show_usage
@@ -40,6 +38,55 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-cmd="git clone --quiet --single-branch --branch \"code.bdd-with-cucumber.$CHAPTER.$LANGUAGE.start\" git@github.com:cucumber-school/scripts \"$DIRECTORY\""
-echo "$cmd"
-eval "$cmd"
+# No point in forcing the user to choose this one yet
+COURSE=bdd-with-cucumber
+
+if [ -z "$LANGUAGE" ]; then
+  echo "Please choose a language:"
+  select LANGUAGE in "java" "ruby" "js"
+  do
+    [ -n "$LANGUAGE" ] && break
+  done
+fi
+
+function chapters() {
+  git ls-remote git@github.com:cucumber-school/scripts | grep refs/heads/code.$COURSE | grep .$LANGUAGE | grep -v .start$ | cut -d '.' -f 3 | uniq
+}
+
+if [ -z "$CHAPTER" ]; then
+  echo "Please choose a chapter:"
+  select CHAPTER in $(chapters $LANGUAGE)
+  do
+    [ -n "$CHAPTER" ] && break
+  done
+fi
+
+if [ -z "$DIRECTORY" ]; then
+  default=$COURSE.$CHAPTER.$LANGUAGE
+  read -r -p "Where do you want to clone the code? [$default]" DIRECTORY
+  DIRECTORY=${DIRECTORY:-$default}
+fi
+
+if [ -d "$DIRECTORY" ]; then
+  echo "$DIRECTORY already exists!"
+  echo "Please delete that directory or choose a different destination."
+  exit 1
+fi
+
+start_point_branch="code.bdd-with-cucumber.$CHAPTER.$LANGUAGE.start"
+end_point_branch="code.bdd-with-cucumber.$CHAPTER.$LANGUAGE"
+
+git clone --quiet --single-branch --branch "$start_point_branch" git@github.com:cucumber-school/scripts "$DIRECTORY"
+git -C "$DIRECTORY" branch --quiet --move "$start_point_branch" start
+git -C "$DIRECTORY" fetch --quiet git@github.com:cucumber-school/scripts "$end_point_branch:answers"
+echo "The start-point for the code from chapter $CHAPTER of $COURSE ($LANGUAGE) has been cloned into $DIRECTORY"
+echo
+echo "That directory is a little git repo which also has an 'answers' branch where you can see the code we used in the videos."
+echo
+echo "Try running this command to see all the commits we used in the videos:"
+echo "  git log --reverse --patch answers"
+echo
+
+cd "$DIRECTORY" || exit 1
+$SHELL || exit 0
+
