@@ -2,7 +2,7 @@
 
 GREEN='\033[0;32m'
 NO_COLOR='\033[0m'
-echo -e $GREEN
+echo -e "$GREEN"
 cat << 'BANNER'
    ______                           __                 _____      __                __
   / ____/_  _________  ______ ___  / /_  ___  _____   / ___/_____/ /_  ____  ____  / /
@@ -11,7 +11,15 @@ cat << 'BANNER'
 \____/\__,_/\___/\__,_/_/ /_/ /_/_.___/\___/_/      /____/\___/_/ /_/\____/\____/_/
 
 BANNER
-echo -e $NO_COLOR
+cat << INTRO
+This tool will set you up ready to follow along with the conding examples from the Cucumber School video series.
+
+We keep all the code for the videos in git, we're going to get you  to the starting-point for
+any chapter in the series, so you can follow along on your own machine.
+
+It will create a folder below $(pwd) so make sure you're in the right directory before you start.
+INTRO
+echo -e "$NO_COLOR"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -62,13 +70,16 @@ if [ -z "$LANGUAGE" ]; then
   done
 fi
 
-function chapters() {
+function lookup_chapters() {
   git ls-remote git@github.com:cucumber-school/scripts | grep refs/heads/code.$COURSE | grep .$LANGUAGE | grep -v .start$ | cut -d '.' -f 3 | uniq
 }
 
+
 if [ -z "$CHAPTER" ]; then
+  chapters="$(lookup_chapters $LANGUAGE)"
+  echo
   echo "Please choose a chapter:"
-  select CHAPTER in $(chapters $LANGUAGE)
+  select CHAPTER in $chapters
   do
     [ -n "$CHAPTER" ] && break
   done
@@ -76,6 +87,7 @@ fi
 
 if [ -z "$DIRECTORY" ]; then
   default=$COURSE.$CHAPTER.$LANGUAGE
+  echo
   read -r -p "Where do you want to clone the code? [$default]" DIRECTORY
   DIRECTORY=${DIRECTORY:-$default}
 fi
@@ -89,16 +101,21 @@ fi
 start_point_branch="code.bdd-with-cucumber.$CHAPTER.$LANGUAGE.start"
 end_point_branch="code.bdd-with-cucumber.$CHAPTER.$LANGUAGE"
 
+printf "Cloning code branch into %s..." "$DIRECTORY"
 git clone --quiet --single-branch --branch "$start_point_branch" git@github.com:cucumber-school/scripts "$DIRECTORY"
 git -C "$DIRECTORY" branch --quiet --move "$start_point_branch" start
 git -C "$DIRECTORY" fetch --quiet git@github.com:cucumber-school/scripts "$end_point_branch:answers"
+printf "Done\n"
+echo -e "$GREEN"
 echo "The start-point for the code from chapter $CHAPTER of $COURSE ($LANGUAGE) has been cloned into $DIRECTORY"
 echo
 echo "That directory is a little git repo which also has an 'answers' branch where you can see the code we used in the videos."
 echo
 echo "Try running this command to see all the commits we used in the videos:"
-echo "  git log --reverse --patch answers"
+echo "  git log --reverse answers"
 echo
+echo "Moving you into that directory so you can get started right away. Have fun!"
+echo -e "$NO_COLOR"
 
 cd "$DIRECTORY" || exit 1
 $SHELL || exit 0
