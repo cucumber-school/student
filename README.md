@@ -1,6 +1,6 @@
 # Cucumber School Student Guide
 
-A tool for helping students download the code for each [Cucumber School](https://school.cucumber.io ) lesson, so you can easily follow along with the videos.
+A command-line tool for helping students download the code for each [Cucumber School](https://school.cucumber.io ) lesson, so you can easily follow along with the videos.
 
 Try it out:
 
