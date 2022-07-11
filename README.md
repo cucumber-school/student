@@ -1,8 +1,8 @@
-# Cucumber School Student Tourguide
+# Cucumber School Student Guide
 
-For helping students follow along with the videos
+A tool for helping students follow along with the https://school.cucumber.io videos, and get the code for each lesson.
 
-Try it:
+Try it out:
 
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/cucumber-school/student/a7196c847180784405b6f764e26331b4542a1724/cucumber-school)
