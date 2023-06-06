@@ -71,7 +71,7 @@ if [ -z "$LANGUAGE" ]; then
 fi
 
 function lookup_chapters() {
-  git ls-remote git@github.com:cucumber-school/scripts | grep refs/heads/code.$COURSE | grep .$LANGUAGE | grep -v .start$ | cut -d '.' -f 3 | uniq
+  git ls-remote https://github.com/cucumber-school/scripts.git | grep refs/heads/code.$COURSE | grep .$LANGUAGE | grep -v .start$ | cut -d '.' -f 3 | uniq
 }
 
 
@@ -102,9 +102,9 @@ start_point_branch="code.bdd-with-cucumber.$CHAPTER.$LANGUAGE.start"
 end_point_branch="code.bdd-with-cucumber.$CHAPTER.$LANGUAGE"
 
 printf "Cloning code branch into %s..." "$DIRECTORY"
-git clone --quiet --single-branch --branch "$start_point_branch" git@github.com:cucumber-school/scripts "$DIRECTORY"
+git clone --quiet --single-branch --branch "$start_point_branch" https://github.com/cucumber-school/scripts.git "$DIRECTORY"
 git -C "$DIRECTORY" branch --quiet --move "$start_point_branch" start
-git -C "$DIRECTORY" fetch --quiet git@github.com:cucumber-school/scripts "$end_point_branch:answers"
+git -C "$DIRECTORY" fetch --quiet https://github.com/cucumber-school/scripts.git "$end_point_branch:answers"
 printf "Done\n"
 echo -e "$GREEN"
 echo "The start-point for the code from chapter $CHAPTER of $COURSE ($LANGUAGE) has been cloned into $DIRECTORY"
